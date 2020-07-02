@@ -49,12 +49,16 @@ namespace IpWorkerService
                             smtpClient.Connect(appConfig.EmailConfig.Smtp, appConfig.EmailConfig.Port, true);
                             smtpClient.Authenticate(appConfig.EmailConfig.Sender, appConfig.EmailConfig.SenderPwd);
                             var message = new MimeMessage();
-                            message.From.Add(new MailboxAddress(string.Empty, appConfig.EmailConfig.Sender));
-                            message.To.Add(new MailboxAddress(string.Empty, appConfig.EmailConfig.To));
+                            message.From.Add(new MailboxAddress("系统通知", appConfig.EmailConfig.Sender));
+                            var toEmails = appConfig.EmailConfig.To.Split(",");
+                            foreach (var toEmail in toEmails)
+                            {
+                                message.To.Add(new MailboxAddress(string.Empty, toEmail));
+                            }
                             message.Subject = "Ip变更通知";
                             message.Body = new TextPart()
                             {
-                                Text = $"您的IP变更成:{wanIpAddr}"
+                                Text = $"您的IP从{preIpAddr}变更成:{wanIpAddr}"
                             };
                             smtpClient.Send(message);
                             smtpClient.Disconnect(true);
@@ -64,9 +68,9 @@ namespace IpWorkerService
                 }
                 catch (Exception e)
                 {
-                    _logger.LogInformation($"{DateTimeOffset.Now} 发生异常: {e.Message}");
+                    _logger.LogInformation($"{DateTime.Now} 发生异常: {e.Message}");
                 }
-                _logger.LogInformation($"{DateTimeOffset.Now} ip: {wanIpAddr}");
+                _logger.LogInformation($"{DateTime.Now} ip: {wanIpAddr}");
                 await Task.Delay(appConfig.MillisecondsDelay, stoppingToken);
             }
         }
