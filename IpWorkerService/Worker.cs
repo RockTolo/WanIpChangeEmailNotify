@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using MimeKit;
 using System;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,8 +39,10 @@ namespace IpWorkerService
                     {
                         var response = await httpClient.GetAsync(appConfig.GetWanIpUrl);
                         wanIpAddr = await response.Content.ReadAsStringAsync();
-                    }                    
+                    }
 
+                    wanIpAddr = Regex.Match(wanIpAddr, @"((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}")?.Value;
+                    
                     if (!string.IsNullOrEmpty(preIpAddr) && 
                         !string.IsNullOrEmpty(wanIpAddr) && 
                         preIpAddr != wanIpAddr)
